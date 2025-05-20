@@ -22,6 +22,7 @@ from keep.api.core.db import (
 )
 from keep.api.core.workflows import get_workflows_with_last_executions_v2
 from keep.api.models.db.workflow import Workflow as WorkflowModel
+from keep.api.models.db.workflow import WorkflowExecution
 from keep.api.models.query import QueryDto
 from keep.api.models.workflow import PreparsedWorkflowDTO, ProviderDTO
 from keep.functions import cyaml
@@ -41,7 +42,7 @@ class WorkflowStore:
         tenant_id: str,
         workflow_execution_id: str,
         is_test_run: bool | None = None,
-    ):
+    ) -> WorkflowExecution:
         return get_workflow_execution(tenant_id, workflow_execution_id, is_test_run)
 
     def create_workflow(

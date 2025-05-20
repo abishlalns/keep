@@ -27,12 +27,11 @@ from keep.api.core.db import (
     get_last_workflow_workflow_to_alert_executions,
     get_or_create_dummy_workflow,
     get_session,
-    get_workflow_by_id as get_workflow_by_id_db,
-    get_workflow_version,
-    get_workflow_versions,
-    update_workflow_by_id as update_workflow_by_id_db,
 )
+from keep.api.core.db import get_workflow_by_id as get_workflow_by_id_db
 from keep.api.core.db import get_workflow_executions as get_workflow_executions_db
+from keep.api.core.db import get_workflow_version, get_workflow_versions
+from keep.api.core.db import update_workflow_by_id as update_workflow_by_id_db
 from keep.api.core.workflows import (
     get_workflow_facets,
     get_workflow_facets_data,
@@ -1079,6 +1078,39 @@ def get_workflow_execution_status(
         event_id = workflow_execution.workflow_to_incident_execution.incident_id
         event_type = "incident"
 
+    # Group logs by step_id and limit to 20 per step
+    logs_by_step = {}
+    for log in workflow_execution.logs:
+        step_id = log.context.get("step_id") if log.context else None
+        if step_id:
+            if step_id not in logs_by_step:
+                logs_by_step[step_id] = []
+            if len(logs_by_step[step_id]) < 20:
+                logs_by_step[step_id].append(log)
+        else:
+            # For logs without step_id, add them to a special group
+            # I.e, "Running workflow XX"
+            if "no_step" not in logs_by_step:
+                logs_by_step["no_step"] = []
+                logs_by_step["no_step"].append(log)
+
+    # Flatten the logs back into a list
+    limited_logs = []
+    for step_logs in logs_by_step.values():
+        limited_logs.extend(step_logs)
+
+    # Sort logs by timestamp to maintain chronological order
+    limited_logs.sort(key=lambda x: x.timestamp)
+
+    # Limit results to 50 entries per key
+    limited_results = {}
+    if workflow_execution.results:
+        for key, value in workflow_execution.results.items():
+            if isinstance(value, list):
+                limited_results[key] = value[:50]  # Limit arrays to 50 items
+            else:
+                limited_results[key] = value  # Keep non-array values as is
+
     workflow_execution_dto = WorkflowExecutionDTO(
         id=workflow_execution.id,
         workflow_name=workflow.name if workflow else None,
@@ -1096,9 +1128,9 @@ def get_workflow_execution_status(
                 message=log.message,
                 context=log.context if log.context else {},
             )
-            for log in workflow_execution.logs
+            for log in limited_logs
         ],
-        results=workflow_execution.results,
+        results=limited_results,
         event_id=event_id,
         event_type=event_type,
     )

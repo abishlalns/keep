@@ -1179,7 +1179,7 @@ def push_logs_to_db(log_entries):
 
 def get_workflow_execution(
     tenant_id: str, workflow_execution_id: str, is_test_run: bool | None = None
-):
+) -> WorkflowExecution:
     with Session(engine) as session:
         base_query = session.query(WorkflowExecution)
         if is_test_run is not None:
