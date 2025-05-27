@@ -62,6 +62,7 @@ export const DEFAULT_COLS = [
   "description",
   "lastReceived",
   "alertMenu",
+  "service",
 ];
 export const DEFAULT_COLS_VISIBILITY = DEFAULT_COLS.reduce<VisibilityState>(
   (acc, colId) => ({ ...acc, [colId]: true }),

@@ -65,7 +65,7 @@ export const FacetsPanel: React.FC<FacetsPanelProps> = ({
   const onCelChangeRef = useRef(onCelChange);
   onCelChangeRef.current = onCelChange;
 
-  const LIST_OF_FACETS = ["severity", "source", "service"];
+  const LIST_OF_FACETS = ["severity", "service"];
 
   const facetsConfigIdBased = useMemo(() => {
     const result: FacetsConfig = {};

@@ -252,7 +252,7 @@ export default function IncidentsTable({
     // }),
     columnHelper.display({
       id: "services",
-      header: "Involved Services",
+      header: "Services",
       cell: ({ row }) => {
         const maxServices = 2;
         const notNullServices = row.original.services.filter(
