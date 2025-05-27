@@ -31,10 +31,10 @@ import { useFacetPotentialFields } from "@/features/filter";
 
 const staticOptions = [
   { value: 'severity > "info"', label: 'severity > "info"' },
-  { value: 'status=="firing"', label: 'status == "firing"' },
-  { value: 'source=="grafana"', label: 'source == "grafana"' },
+  { value: 'source=="CameraModule"', label: 'source == "CameraModule"' },
   { value: 'message.contains("CPU")', label: 'message.contains("CPU")' },
-];
+  { value: "description.contains('error')", label: "description.contains('error')" },
+]
 
 const CustomOption = (props: any) => {
   return (
@@ -351,13 +351,13 @@ export const AlertsRulesBuilder = ({
 
   const fields: Field[] = table
     ? table
-        .getAllColumns()
-        .filter(({ getIsPinned }) => getIsPinned() === false)
-        .map(({ id, columnDef }) => ({
-          name: id,
-          label: columnDef.header as string,
-          operators: getOperators(id),
-        }))
+      .getAllColumns()
+      .filter(({ getIsPinned }) => getIsPinned() === false)
+      .map(({ id, columnDef }) => ({
+        name: id,
+        label: columnDef.header as string,
+        operators: getOperators(id),
+      }))
     : customFields
       ? customFields
       : [];
@@ -421,7 +421,7 @@ export const AlertsRulesBuilder = ({
               <div className="relative">
                 <CelInput
                   id="alerts-cel-input"
-                  placeholder='Use CEL to filter your alerts e.g. source.contains("kibana").'
+                  placeholder='Use CEL to filter your alerts.'
                   value={celRules}
                   fieldsForSuggestions={alertFields}
                   onValueChange={setCELRules}
@@ -441,17 +441,17 @@ export const AlertsRulesBuilder = ({
                       minimal
                         ? undefined
                         : {
-                            ...customComponents,
-                            MenuList: (props) => (
-                              <CustomMenuList
-                                {...props}
-                                docsUrl={
-                                  config?.KEEP_DOCS_URL ||
-                                  "https://docs.keephq.dev"
-                                }
-                              />
-                            ),
-                          }
+                          ...customComponents,
+                          MenuList: (props) => (
+                            <CustomMenuList
+                              {...props}
+                              docsUrl={
+                                config?.KEEP_DOCS_URL ||
+                                "https://docs.keephq.dev"
+                              }
+                            />
+                          ),
+                        }
                     }
                     onBlur={() => setShowSuggestions(false)}
                   />
@@ -472,7 +472,7 @@ export const AlertsRulesBuilder = ({
           </div>
 
           {/* Buttons next to the Textarea */}
-          {showSave && (
+          {/* {showSave && (
             <Button
               icon={FiSave}
               color="orange"
@@ -508,7 +508,7 @@ export const AlertsRulesBuilder = ({
                 )
               }
             ></Button>
-          )}
+          )} */}
         </div>
       </div>
       {/* Import SQL */}
