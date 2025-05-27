@@ -1,0 +1,43 @@
+workflow:
+  id: 690b0ffc-5bff-4a6b-b9b3-9ec786df05df
+  name: MySQL Alert Sync
+  description: Synchronizes alerts from a MySQL database into Keep, with
+    configurable intervals and data mapping.
+  disabled: false
+  triggers:
+    - type: manual
+    - type: interval
+      value: "30"
+  inputs: []
+  owners: []
+  services: []
+  consts: {}
+  steps:
+    - name: get-alerts-from-mysql
+      if: keep.eq("", '{{ last_workflow_run_time }}') == False
+      provider:
+        type: mysql
+        config: "{{ providers.MySQL Logs Database }}"
+        with:
+          query: select * from monitoring_events where ts > '{{ last_workflow_run_time }}'
+          as_dict: true
+  actions:
+    - name: create-alert
+      if: keep.len({{ steps.get-alerts-from-mysql.results }}) > 0
+      provider:
+        type: keep
+        config: "{{ providers.default-keep }}"
+        with:
+          override_source_with: mysql
+          read_only: true
+          fingerprint_fields:
+            - id
+          alert:
+            name: "{{ name }}"
+            description: "{{ description }}"
+            severity: "{{ severity }}"
+            environment: "{{ environment }}"
+            product_name: "{{ product_name }}"
+            service: "{{ service }}"
+            operator: "{{ operator }}"
+            run_id: "{{ run_id }}"
